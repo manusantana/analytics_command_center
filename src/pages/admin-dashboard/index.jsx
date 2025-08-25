@@ -18,10 +18,16 @@ const AdminDashboard = () => {
   const [editingConfig, setEditingConfig] = useState(null);
 
   const adminService = new AdminConfigService();
+  const supabaseConfigured =
+    Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY);
 
   useEffect(() => {
-    if (!authLoading && user) {
-      loadData();
+    if (!authLoading) {
+      if (user) {
+        loadData();
+      } else {
+        setLoading(false);
+      }
     }
   }, [user, authLoading]);
 
@@ -127,6 +133,20 @@ const AdminDashboard = () => {
       setError(err?.message || 'Failed to delete service configuration');
     }
   };
+
+  if (!supabaseConfigured) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Shield className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Supabase Not Configured</h2>
+          <p className="text-gray-600">
+            Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env file to enable the admin dashboard.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (authLoading) {
     return (
