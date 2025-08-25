@@ -35,6 +35,18 @@ A modern React-based project utilizing the latest frontend technologies and tool
    yarn start
    ```
 
+### Environment Variables
+
+Copy `.env.example` to `.env` and provide the required keys before running the app:
+
+```
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_SHOPIFY_STORE_URL=your_shopify_store_url
+VITE_SHOPIFY_ACCESS_TOKEN=your_shopify_admin_token
+VITE_GA_MEASUREMENT_ID=your_ga4_measurement_id
+```
+
 ## 📁 Project Structure
 
 ```

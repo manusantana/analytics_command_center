@@ -4,7 +4,8 @@ class AdminConfigService {
   // Customer Management
   async getCustomers() {
     try {
-      const { data, error } = await supabase?.from('customers')?.select('*')?.order('created_at', { ascending: false });
+      if (!supabase) throw new Error('Supabase client not initialized');
+      const { data, error } = await supabase.from('customers').select('*').order('created_at', { ascending: false });
 
       if (error) throw error;
       return { data, error: null };
@@ -15,7 +16,8 @@ class AdminConfigService {
 
   async createCustomer(customerData) {
     try {
-      const { data, error } = await supabase?.from('customers')?.insert([customerData])?.select()?.single();
+      if (!supabase) throw new Error('Supabase client not initialized');
+      const { data, error } = await supabase.from('customers').insert([customerData]).select().single();
 
       if (error) throw error;
       return { data, error: null };
@@ -26,7 +28,8 @@ class AdminConfigService {
 
   async updateCustomer(id, customerData) {
     try {
-      const { data, error } = await supabase?.from('customers')?.update(customerData)?.eq('id', id)?.select()?.single();
+      if (!supabase) throw new Error('Supabase client not initialized');
+      const { data, error } = await supabase.from('customers').update(customerData).eq('id', id).select().single();
 
       if (error) throw error;
       return { data, error: null };
@@ -37,7 +40,8 @@ class AdminConfigService {
 
   async deleteCustomer(id) {
     try {
-      const { error } = await supabase?.from('customers')?.delete()?.eq('id', id);
+      if (!supabase) throw new Error('Supabase client not initialized');
+      const { error } = await supabase.from('customers').delete().eq('id', id);
 
       if (error) throw error;
       return { error: null };
@@ -49,7 +53,8 @@ class AdminConfigService {
   // Service Configuration Management
   async getServiceConfigurations(customerId = null) {
     try {
-      let query = supabase?.from('service_configurations')?.select(`
+      if (!supabase) throw new Error('Supabase client not initialized');
+      let query = supabase.from('service_configurations').select(`
           *,
           customers (
             id,
@@ -57,10 +62,10 @@ class AdminConfigService {
             email,
             company
           )
-        `)?.order('created_at', { ascending: false });
+        `).order('created_at', { ascending: false });
 
       if (customerId) {
-        query = query?.eq('customer_id', customerId);
+        query = query.eq('customer_id', customerId);
       }
 
       const { data, error } = await query;
@@ -74,7 +79,8 @@ class AdminConfigService {
 
   async createServiceConfiguration(configData) {
     try {
-      const { data, error } = await supabase?.from('service_configurations')?.insert([configData])?.select(`
+      if (!supabase) throw new Error('Supabase client not initialized');
+      const { data, error } = await supabase.from('service_configurations').insert([configData]).select(`
           *,
           customers (
             id,
@@ -82,7 +88,7 @@ class AdminConfigService {
             email,
             company
           )
-        `)?.single();
+        `).single();
 
       if (error) throw error;
       return { data, error: null };
@@ -93,7 +99,8 @@ class AdminConfigService {
 
   async updateServiceConfiguration(id, configData) {
     try {
-      const { data, error } = await supabase?.from('service_configurations')?.update(configData)?.eq('id', id)?.select(`
+      if (!supabase) throw new Error('Supabase client not initialized');
+      const { data, error } = await supabase.from('service_configurations').update(configData).eq('id', id).select(`
           *,
           customers (
             id,
@@ -101,7 +108,7 @@ class AdminConfigService {
             email,
             company
           )
-        `)?.single();
+        `).single();
 
       if (error) throw error;
       return { data, error: null };
@@ -112,7 +119,8 @@ class AdminConfigService {
 
   async deleteServiceConfiguration(id) {
     try {
-      const { error } = await supabase?.from('service_configurations')?.delete()?.eq('id', id);
+      if (!supabase) throw new Error('Supabase client not initialized');
+      const { error } = await supabase.from('service_configurations').delete().eq('id', id);
 
       if (error) throw error;
       return { error: null };
@@ -159,9 +167,10 @@ class AdminConfigService {
   // Helper method for upsert operations
   async upsertServiceConfiguration(configData) {
     try {
-      const { data, error } = await supabase?.from('service_configurations')?.upsert(configData, {
+      if (!supabase) throw new Error('Supabase client not initialized');
+      const { data, error } = await supabase.from('service_configurations').upsert(configData, {
           onConflict: 'customer_id,service_type'
-        })?.select(`
+        }).select(`
           *,
           customers (
             id,
@@ -169,7 +178,7 @@ class AdminConfigService {
             email,
             company
           )
-        `)?.single();
+        `).single();
 
       if (error) throw error;
       return { data, error: null };
@@ -181,14 +190,15 @@ class AdminConfigService {
   // Analytics Data Management
   async getAnalyticsData(customerId, dataType = null, dateRange = null) {
     try {
-      let query = supabase?.from('analytics_data')?.select('*')?.eq('customer_id', customerId)?.order('created_at', { ascending: false });
+      if (!supabase) throw new Error('Supabase client not initialized');
+      let query = supabase.from('analytics_data').select('*').eq('customer_id', customerId).order('created_at', { ascending: false });
 
       if (dataType) {
-        query = query?.eq('data_type', dataType);
+        query = query.eq('data_type', dataType);
       }
 
       if (dateRange?.startDate && dateRange?.endDate) {
-        query = query?.gte('date_range_start', dateRange?.startDate)?.lte('date_range_end', dateRange?.endDate);
+        query = query.gte('date_range_start', dateRange?.startDate).lte('date_range_end', dateRange?.endDate);
       }
 
       const { data, error } = await query;
@@ -202,6 +212,7 @@ class AdminConfigService {
 
   async saveAnalyticsData(customerId, dataType, data, dateRange = null) {
     try {
+      if (!supabase) throw new Error('Supabase client not initialized');
       const analyticsData = {
         customer_id: customerId,
         data_type: dataType,
@@ -210,7 +221,7 @@ class AdminConfigService {
         date_range_end: dateRange?.endDate || null
       };
 
-      const { data: savedData, error } = await supabase?.from('analytics_data')?.insert([analyticsData])?.select()?.single();
+      const { data: savedData, error } = await supabase.from('analytics_data').insert([analyticsData]).select().single();
 
       if (error) throw error;
       return { data: savedData, error: null };
@@ -222,7 +233,8 @@ class AdminConfigService {
   // Get service configuration for a specific customer and service type
   async getCustomerServiceConfig(customerId, serviceType) {
     try {
-      const { data, error } = await supabase?.from('service_configurations')?.select('*')?.eq('customer_id', customerId)?.eq('service_type', serviceType)?.eq('is_active', true)?.single();
+      if (!supabase) throw new Error('Supabase client not initialized');
+      const { data, error } = await supabase.from('service_configurations').select('*').eq('customer_id', customerId).eq('service_type', serviceType).eq('is_active', true).single();
 
       if (error && error?.code !== 'PGRST116') { // PGRST116 is "not found" error
         throw error;
