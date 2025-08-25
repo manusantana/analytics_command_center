@@ -8,7 +8,6 @@ let supabase = null;
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn(
     'Supabase environment variables are not set.\n' +
-      'Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env file to enable Supabase features.'
   );
 } else {
   supabase = createClient(supabaseUrl, supabaseAnonKey);
